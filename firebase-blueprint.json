@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered freelancer user profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "name", "createdAt"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Client organization created by a freelancer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "company": { "type": "string" },
+        "email": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "name", "createdAt"]
+    },
+    "FileItem": {
+      "title": "FileItem",
+      "description": "Uploaded client document metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "originalName": { "type": "string" },
+        "filename": { "type": "string" },
+        "mimeType": { "type": "string" },
+        "size": { "type": "number" },
+        "uploadDate": { "type": "string", "format": "date-time" },
+        "clientName": { "type": "string" },
+        "description": { "type": "string" },
+        "shareToken": { "type": "string" },
+        "downloadCount": { "type": "number" }
+      },
+      "required": ["id", "userId", "originalName", "filename", "mimeType", "size", "uploadDate", "clientName", "shareToken"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection restricted to user owner"
+    },
+    "/clients/{clientId}": {
+      "schema": "Client",
+      "description": "Client records owned by a freelancer"
+    },
+    "/files/{fileId}": {
+      "schema": "FileItem",
+      "description": "Document metadata owned by a freelancer or accessible via valid shareToken"
+    }
+  }
+}

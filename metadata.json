@@ -1,0 +1,6 @@
+{
+  "name": "ClientGard",
+  "description": "Secure client file portal for freelancers to upload, organize, and share documents with customers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

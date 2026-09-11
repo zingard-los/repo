@@ -1,0 +1,87 @@
+{
+  "users": [
+    {
+      "id": "user_demo_freelancer_1",
+      "email": "alex@clientgard.com",
+      "name": "Alex Rivera",
+      "passwordHash": "0af4ffaf0eb15ff52fc3cf26246e248a47504ba33f905a170272882bd6523a2d0de8bd91c074c90b4b47a7a0fb13656bda0651822500f25eb618e2cfefe832be",
+      "salt": "c44839a1e9544fc90678f5ccb8745289",
+      "createdAt": "2026-08-09T09:30:04.156Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "sess_98d233cd198c4c7a5f90bb14a3fad059197eac68ed040f9d",
+      "userId": "user_demo_freelancer_1",
+      "createdAt": "2026-09-08T09:33:38.244Z",
+      "expiresAt": "2026-09-22T09:33:38.244Z"
+    }
+  ],
+  "files": [
+    {
+      "id": "file_sample_1",
+      "userId": "user_demo_freelancer_1",
+      "originalName": "Freelance_Master_Services_Agreement_Nexus.pdf",
+      "filename": "sample_contract.pdf",
+      "mimeType": "application/pdf",
+      "size": 245760,
+      "uploadDate": "2026-08-14T09:30:04.160Z",
+      "clientName": "Nexus Dynamics",
+      "description": "Fully executed master services agreement with signed milestones.",
+      "shareToken": "token_nexus_contract_88a",
+      "downloadCount": 4
+    },
+    {
+      "id": "file_sample_2",
+      "userId": "user_demo_freelancer_1",
+      "originalName": "Apex_Brand_Guidelines_v2.4.pdf",
+      "filename": "sample_brand_guidelines.pdf",
+      "mimeType": "application/pdf",
+      "size": 1420800,
+      "uploadDate": "2026-08-21T09:30:04.160Z",
+      "clientName": "Apex Studio",
+      "description": "Final brand guidelines, typography pairing sheets, and palette tokens.",
+      "shareToken": "token_apex_brand_99b",
+      "downloadCount": 7
+    },
+    {
+      "id": "file_sample_3",
+      "userId": "user_demo_freelancer_1",
+      "originalName": "Invoice_Q3_Vanguard_Retail.pdf",
+      "filename": "sample_invoice_q3.pdf",
+      "mimeType": "application/pdf",
+      "size": 98304,
+      "uploadDate": "2026-09-03T09:30:04.160Z",
+      "clientName": "Vanguard Retail",
+      "description": "Milestone 2 completion invoice with direct wire payment details.",
+      "shareToken": "token_vanguard_inv_77c",
+      "downloadCount": 2
+    }
+  ],
+  "clients": [
+    {
+      "id": "cli_1",
+      "userId": "user_demo_freelancer_1",
+      "name": "Nexus Dynamics",
+      "email": "contact@nexusdynamics.io",
+      "company": "Nexus Dynamics LLC",
+      "createdAt": "2026-08-11T09:30:04.159Z"
+    },
+    {
+      "id": "cli_2",
+      "userId": "user_demo_freelancer_1",
+      "name": "Apex Studio",
+      "email": "hello@apexstudio.design",
+      "company": "Apex Design Collective",
+      "createdAt": "2026-08-19T09:30:04.159Z"
+    },
+    {
+      "id": "cli_3",
+      "userId": "user_demo_freelancer_1",
+      "name": "Vanguard Retail",
+      "email": "legal@vanguardretail.com",
+      "company": "Vanguard Group",
+      "createdAt": "2026-08-25T09:30:04.159Z"
+    }
+  ]
+}
