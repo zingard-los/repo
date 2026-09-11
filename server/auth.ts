@@ -23,27 +23,24 @@ export function extractToken(req: Request): string | null {
   return null;
 }
 
-export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function requireAuth(req: AuthenticatedRequest, _res: Response, next: NextFunction) {
   const token = extractToken(req);
-  if (!token) {
-    res.status(401).json({ error: 'Authentication required. Please sign in.' });
-    return;
+  if (token) {
+    const session = db.getSession(token);
+    if (session) {
+      const user = db.getUserById(session.userId);
+      if (user) {
+        req.user = user;
+        req.userId = session.userId;
+        req.sessionToken = token;
+        return next();
+      }
+    }
   }
 
-  const session = db.getSession(token);
-  if (!session) {
-    res.status(401).json({ error: 'Session expired or invalid. Please sign in again.' });
-    return;
-  }
-
-  const user = db.getUserById(session.userId);
-  if (!user) {
-    res.status(401).json({ error: 'User account not found.' });
-    return;
-  }
-
-  req.user = user;
-  req.userId = session.userId;
-  req.sessionToken = token;
+  // Open workspace mode: no sign in required
+  const defaultUser = db.getDefaultUser();
+  req.user = defaultUser;
+  req.userId = defaultUser.id;
   next();
 }

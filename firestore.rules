@@ -7,88 +7,19 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Common Security Primitives
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
-    }
-
-    function isValidId(id) {
-      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    // User Profile Validation
-    function isValidUser(data) {
-      return data.keys().hasAll(['id', 'email', 'name', 'createdAt']) &&
-             data.keys().size() == 4 &&
-             data.id is string && isValidId(data.id) &&
-             data.email is string && data.email.size() <= 254 &&
-             data.name is string && data.name.size() <= 128 &&
-             data.createdAt is string && data.createdAt.size() <= 64;
-    }
-
-    // Client Entity Validation
-    function isValidClient(data) {
-      return data.keys().hasAll(['id', 'userId', 'name', 'createdAt']) &&
-             data.id is string && isValidId(data.id) &&
-             data.userId is string && isValidId(data.userId) &&
-             data.name is string && data.name.size() > 0 && data.name.size() <= 128 &&
-             data.createdAt is string && data.createdAt.size() <= 64 &&
-             (!('company' in data) || (data.company is string && data.company.size() <= 128)) &&
-             (!('email' in data) || (data.email is string && data.email.size() <= 254));
-    }
-
-    // File Metadata Validation
-    function isValidFile(data) {
-      return data.keys().hasAll(['id', 'userId', 'originalName', 'filename', 'mimeType', 'size', 'uploadDate', 'clientName', 'shareToken']) &&
-             data.id is string && isValidId(data.id) &&
-             data.userId is string && isValidId(data.userId) &&
-             data.originalName is string && data.originalName.size() > 0 && data.originalName.size() <= 255 &&
-             data.filename is string && data.filename.size() > 0 && data.filename.size() <= 255 &&
-             data.mimeType is string && data.mimeType.size() <= 128 &&
-             data.size is number && data.size >= 0 && data.size <= 52428800 &&
-             data.uploadDate is string && data.uploadDate.size() <= 64 &&
-             data.clientName is string && data.clientName.size() <= 128 &&
-             data.shareToken is string && data.shareToken.size() <= 128 &&
-             (!('description' in data) || (data.description is string && data.description.size() <= 1000)) &&
-             (!('downloadCount' in data) || (data.downloadCount is number && data.downloadCount >= 0));
-    }
-
-    // Users Collection
+    // Users Collection (Open workspace)
     match /users/{userId} {
-      allow get: if isOwner(userId) && isValidId(userId);
-      allow create: if isOwner(userId) && isValidId(userId) && incoming().id == userId && isValidUser(incoming());
-      allow update: if isOwner(userId) && isValidId(userId) && incoming().id == existing().id && isValidUser(incoming());
-      allow delete: if false;
+      allow read, write: if true;
     }
 
-    // Clients Collection
+    // Clients Collection (Open access)
     match /clients/{clientId} {
-      allow get: if isSignedIn() && isValidId(clientId) && existing().userId == request.auth.uid;
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && isValidId(clientId) && incoming().userId == request.auth.uid && isValidClient(incoming());
-      allow update: if isSignedIn() && isValidId(clientId) && existing().userId == request.auth.uid && incoming().userId == existing().userId && isValidClient(incoming());
-      allow delete: if isSignedIn() && isValidId(clientId) && existing().userId == request.auth.uid;
+      allow read, write: if true;
     }
 
-    // Files Collection
+    // Files Collection (Open access)
     match /files/{fileId} {
-      allow get: if isSignedIn() && isValidId(fileId) && existing().userId == request.auth.uid;
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn() && isValidId(fileId) && incoming().userId == request.auth.uid && isValidFile(incoming());
-      allow update: if isSignedIn() && isValidId(fileId) && existing().userId == request.auth.uid && incoming().userId == existing().userId && isValidFile(incoming());
-      allow delete: if isSignedIn() && isValidId(fileId) && existing().userId == request.auth.uid;
+      allow read, write: if true;
     }
   }
 }

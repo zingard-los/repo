@@ -5,7 +5,6 @@ import {
   UploadCloud, 
   Users, 
   ExternalLink, 
-  LogOut, 
   HardDrive, 
   Plus
 } from 'lucide-react';
@@ -21,7 +20,6 @@ interface SidebarProps {
   activeTab: 'files' | 'upload' | 'clients' | 'preview';
   onSelectTab: (tab: 'files' | 'upload' | 'clients' | 'preview') => void;
   onOpenNewClientModal: () => void;
-  onSignOut: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -32,8 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectClientFilter,
   activeTab,
   onSelectTab,
-  onOpenNewClientModal,
-  onSignOut
+  onOpenNewClientModal
 }) => {
   return (
     <aside 
@@ -49,22 +46,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold tracking-tight text-white font-sans">ClientGard</h1>
             <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-              PRO
+              OPEN
             </span>
           </div>
           <p className="text-xs text-slate-400">Freelancer File Portal</p>
         </div>
       </div>
 
-      {/* User Info Capsule */}
-      <div className="px-5 py-4 border-b border-slate-800/60 bg-slate-900/40">
+      {/* Workspace Status Capsule */}
+      <div className="px-5 py-3.5 border-b border-slate-800/60 bg-slate-900/40">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-500 text-white font-semibold flex items-center justify-center text-sm ring-2 ring-blue-500/30">
-            {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-bold flex items-center justify-center text-sm">
+            <UploadCloud className="w-5 h-5 text-blue-400" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white truncate">{user.name || 'Freelancer'}</p>
-            <p className="text-xs text-slate-400 truncate">{user.email}</p>
+            <p className="text-sm font-semibold text-white truncate">{user.name || 'Freelance Workspace'}</p>
+            <p className="text-xs text-emerald-400 font-medium truncate flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              No Sign-In Required
+            </p>
           </div>
         </div>
       </div>
@@ -224,16 +224,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Bottom Sign Out Area */}
+      {/* Bottom Status / Quick Info Area */}
       <div className="p-4 border-t border-slate-800/80 bg-[#09101F]">
-        <button
-          id="btn-sign-out"
-          onClick={onSignOut}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white bg-slate-800/70 hover:bg-rose-950/40 hover:border-rose-800/60 border border-slate-700/60 transition-all duration-150"
-        >
-          <LogOut className="w-4 h-4 text-slate-400 group-hover:text-rose-400" />
-          <span>Sign out</span>
-        </button>
+        <div className="flex items-center gap-2 text-xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="font-semibold text-slate-200">Instant Access Portal</span>
+        </div>
+        <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+          Drag & drop or upload files freely. No accounts or logins needed.
+        </p>
       </div>
     </aside>
   );

@@ -12,12 +12,9 @@ import {
   ExternalLink,
   X
 } from 'lucide-react';
-import { api, authStorage } from './api';
+import { api } from './api';
 import { User, FileItem, ClientItem, UserStats } from './types';
-import { signOut } from 'firebase/auth';
-import { auth } from './firebase';
 import { Sidebar } from './components/Sidebar';
-import { AuthView } from './components/AuthView';
 import { UploadArea } from './components/UploadArea';
 import { FileList } from './components/FileList';
 import { FilePreviewModal } from './components/FilePreviewModal';
@@ -27,11 +24,17 @@ import { ClientPortalView } from './components/ClientPortalView';
 import { ClientsManager } from './components/ClientsManager';
 import { formatBytes } from './utils/formatters';
 
+const DEFAULT_WORKSPACE_USER: User = {
+  id: 'workspace_user_1',
+  email: 'workspace@clientgard.com',
+  name: 'Freelance Workspace',
+  createdAt: new Date().toISOString()
+};
+
 export default function App() {
-  // Authentication & User state
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  // Authentication & User state (Open workspace - no sign in required)
+  const [currentUser, setCurrentUser] = useState<User>(DEFAULT_WORKSPACE_USER);
   const [stats, setStats] = useState<UserStats | null>(null);
-  const [authLoading, setAuthLoading] = useState<boolean>(true);
 
   // Files & Clients state
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -76,34 +79,8 @@ export default function App() {
     return () => window.removeEventListener('hashchange', checkHash);
   }, []);
 
-  // Check current session on mount
-  useEffect(() => {
-    async function checkAuth() {
-      const token = authStorage.getToken();
-      if (!token) {
-        setAuthLoading(false);
-        return;
-      }
-
-      try {
-        const res = await api.getMe();
-        setCurrentUser(res.user);
-        setStats(res.stats);
-      } catch (e) {
-        console.warn('Session expired or invalid:', e);
-        authStorage.clearToken();
-        setCurrentUser(null);
-      } finally {
-        setAuthLoading(false);
-      }
-    }
-
-    checkAuth();
-  }, []);
-
-  // Fetch files and clients when user is logged in
+  // Fetch files and clients
   const refreshData = useCallback(async () => {
-    if (!currentUser) return;
     setDataLoading(true);
     try {
       const [filesRes, clientsRes, meRes] = await Promise.all([
@@ -114,35 +91,20 @@ export default function App() {
       setFiles(filesRes.files);
       setClients(clientsRes.clients);
       setStats(meRes.stats);
+      if (meRes.user) {
+        setCurrentUser(meRes.user);
+      }
     } catch (err) {
       console.error('Failed to load data:', err);
     } finally {
       setDataLoading(false);
     }
-  }, [currentUser]);
+  }, []);
 
+  // Initialize workspace on mount
   useEffect(() => {
-    if (currentUser) {
-      refreshData();
-    }
-  }, [currentUser, refreshData]);
-
-  // Sign out handler
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-    } catch (e) {
-      console.warn('Firebase signOut error:', e);
-    }
-    await api.logout();
-    setCurrentUser(null);
-    setFiles([]);
-    setClients([]);
-    setStats(null);
-    setActiveTab('files');
-    setClientFilter('all');
-    showToast('Signed out successfully.');
-  };
+    refreshData();
+  }, [refreshData]);
 
   // Delete file action
   const handleConfirmDelete = async () => {
@@ -187,32 +149,6 @@ export default function App() {
     );
   }
 
-  // Loading state
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-2xl bg-[#0B1528] text-blue-500 flex items-center justify-center mx-auto mb-3 animate-pulse border border-slate-700">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <p className="text-sm font-semibold text-slate-700">Loading ClientGard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Not logged in -> Show Authentication View (Sign in / Create Account)
-  if (!currentUser) {
-    return (
-      <AuthView
-        onSuccess={(user) => {
-          setCurrentUser(user);
-          showToast(`Welcome back, ${user.name}!`);
-        }}
-      />
-    );
-  }
-
   // Target preview file for Client Portal Preview Demo
   const demoShareFile = files.length > 0 ? files[0] : null;
 
@@ -239,7 +175,6 @@ export default function App() {
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         onOpenNewClientModal={() => setIsNewClientModalOpen(true)}
-        onSignOut={handleSignOut}
       />
 
       {/* Main Content Area (White & Blue palette) */}
@@ -265,7 +200,7 @@ export default function App() {
               )}
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Freelancer portal • Signed in as <span className="font-semibold text-slate-700">{currentUser.name}</span>
+              Freelancer portal • Open access enabled (no sign-in required)
             </p>
           </div>
 

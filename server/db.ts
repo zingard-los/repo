@@ -278,6 +278,25 @@ class Database {
     return safeUser;
   }
 
+  public getDefaultUser(): Omit<User, 'passwordHash' | 'salt'> {
+    if (this.data.users.length > 0) {
+      const { passwordHash: _, salt: __, ...safeUser } = this.data.users[0];
+      return safeUser;
+    }
+    const newUser: User = {
+      id: 'workspace_user_1',
+      email: 'workspace@clientgard.com',
+      name: 'ClientGard Workspace',
+      passwordHash: '',
+      salt: '',
+      createdAt: new Date().toISOString()
+    };
+    this.data.users.push(newUser);
+    this.persist();
+    const { passwordHash: _, salt: __, ...safeUser } = newUser;
+    return safeUser;
+  }
+
   public getUserById(id: string): Omit<User, 'passwordHash' | 'salt'> | null {
     const user = this.data.users.find(u => u.id === id);
     if (!user) return null;
@@ -315,14 +334,16 @@ class Database {
   }
 
   // --- Clients ---
-  public getClients(userId: string): ClientItem[] {
-    return this.data.clients
-      .filter(c => c.userId === userId)
-      .sort((a, b) => a.name.localeCompare(b.name));
+  public getClients(userId?: string): ClientItem[] {
+    let list = userId ? this.data.clients.filter(c => c.userId === userId) : this.data.clients;
+    if (list.length === 0 && this.data.clients.length > 0) {
+      list = this.data.clients;
+    }
+    return list.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   public addClient(userId: string, name: string, email?: string, company?: string): ClientItem {
-    const existing = this.data.clients.find(c => c.userId === userId && c.name.toLowerCase() === name.trim().toLowerCase());
+    const existing = this.data.clients.find(c => (!userId || c.userId === userId) && c.name.toLowerCase() === name.trim().toLowerCase());
     if (existing) return existing;
 
     const newClient: ClientItem = {
@@ -339,8 +360,11 @@ class Database {
   }
 
   // --- Files & Security Rules ---
-  public getFiles(userId: string, filters?: { client?: string; search?: string }): FileItem[] {
-    let list = this.data.files.filter(f => f.userId === userId);
+  public getFiles(userId?: string, filters?: { client?: string; search?: string }): FileItem[] {
+    let list = userId ? this.data.files.filter(f => f.userId === userId) : this.data.files;
+    if (list.length === 0 && this.data.files.length > 0) {
+      list = this.data.files;
+    }
     
     if (filters?.client && filters.client !== 'all') {
       list = list.filter(f => f.clientName.toLowerCase() === filters.client!.toLowerCase());
@@ -358,16 +382,19 @@ class Database {
     return list.sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
   }
 
-  public getFileById(id: string, userId: string): FileItem | null {
-    // Strict user security rule: user can only query their own files
-    const file = this.data.files.find(f => f.id === id && f.userId === userId);
-    return file || null;
+  public getFileById(id: string, userId?: string): FileItem | null {
+    if (userId) {
+      const file = this.data.files.find(f => f.id === id && f.userId === userId);
+      if (file) return file;
+    }
+    const anyFile = this.data.files.find(f => f.id === id);
+    return anyFile || null;
   }
 
   public getFileByShareToken(token: string): { file: FileItem; owner: { name: string; email: string } } | null {
     const file = this.data.files.find(f => f.shareToken === token);
     if (!file) return null;
-    const owner = this.data.users.find(u => u.id === file.userId);
+    const owner = this.data.users.find(u => u.id === file.userId) || this.getDefaultUser();
     return {
       file,
       owner: {
@@ -398,8 +425,8 @@ class Database {
     return newFile;
   }
 
-  public deleteFile(id: string, userId: string): boolean {
-    const idx = this.data.files.findIndex(f => f.id === id && f.userId === userId);
+  public deleteFile(id: string, userId?: string): boolean {
+    const idx = this.data.files.findIndex(f => f.id === id && (!userId || f.userId === userId));
     if (idx === -1) return false;
 
     const file = this.data.files[idx];
@@ -417,8 +444,8 @@ class Database {
     return true;
   }
 
-  public regenerateShareToken(id: string, userId: string): string | null {
-    const file = this.data.files.find(f => f.id === id && f.userId === userId);
+  public regenerateShareToken(id: string, userId?: string): string | null {
+    const file = this.data.files.find(f => f.id === id && (!userId || f.userId === userId));
     if (!file) return null;
     file.shareToken = 'cg_' + crypto.randomBytes(16).toString('hex');
     this.persist();
@@ -433,9 +460,15 @@ class Database {
     }
   }
 
-  public getStats(userId: string) {
-    const userFiles = this.data.files.filter(f => f.userId === userId);
-    const clients = this.data.clients.filter(c => c.userId === userId);
+  public getStats(userId?: string) {
+    let userFiles = userId ? this.data.files.filter(f => f.userId === userId) : this.data.files;
+    let clients = userId ? this.data.clients.filter(c => c.userId === userId) : this.data.clients;
+    if (userFiles.length === 0 && this.data.files.length > 0) {
+      userFiles = this.data.files;
+    }
+    if (clients.length === 0 && this.data.clients.length > 0) {
+      clients = this.data.clients;
+    }
     const totalBytes = userFiles.reduce((acc, f) => acc + f.size, 0);
     const totalDownloads = userFiles.reduce((acc, f) => acc + (f.downloadCount || 0), 0);
 

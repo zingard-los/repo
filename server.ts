@@ -128,15 +128,12 @@ async function startServer() {
     res.json({ message: 'Signed out successfully.' });
   });
 
-  // Current authenticated user info & overview stats
+  // Current workspace user info & overview stats
   app.get('/api/auth/me', requireAuth, (req: AuthenticatedRequest, res) => {
-    if (!req.user || !req.userId) {
-      res.status(401).json({ error: 'Not authenticated.' });
-      return;
-    }
-    const stats = db.getStats(req.userId);
+    const user = req.user || db.getDefaultUser();
+    const stats = db.getStats(req.userId || user.id);
     res.json({
-      user: req.user,
+      user,
       stats
     });
   });
