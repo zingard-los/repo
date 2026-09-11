@@ -99,6 +99,27 @@ async function startServer() {
     }
   });
 
+  // Sign In with Google
+  app.post('/api/auth/google', (req, res) => {
+    try {
+      const { uid, email, name } = req.body;
+      if (!uid) {
+        res.status(400).json({ error: 'Missing user identification from Google authentication.' });
+        return;
+      }
+      const safeUser = db.findOrCreateGoogleUser(uid, email || '', name || '');
+      const token = db.createSession(safeUser.id);
+      res.json({
+        message: 'Signed in with Google successfully.',
+        user: safeUser,
+        token
+      });
+    } catch (err: any) {
+      console.error('Google auth error:', err);
+      res.status(500).json({ error: 'Internal server error during Google sign in.' });
+    }
+  });
+
   // Sign Out
   app.post('/api/auth/logout', requireAuth, (req: AuthenticatedRequest, res) => {
     if (req.sessionToken) {

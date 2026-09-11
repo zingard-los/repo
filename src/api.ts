@@ -56,6 +56,16 @@ export const api = {
     return data;
   },
 
+  async loginWithGoogle(uid: string, email: string, name: string) {
+    const data = await request<{ user: User; token: string; message: string }>('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid, email, name })
+    });
+    authStorage.setToken(data.token);
+    return data;
+  },
+
   async logout() {
     try {
       await request('/api/auth/logout', { method: 'POST' });

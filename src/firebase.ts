@@ -14,6 +14,7 @@ const app = initializeApp({
 
 export const firestore = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
+export { firebaseConfig };
 
 // Critical constraint: Validate connection to Firestore on boot
 export async function testConnection() {

@@ -7,6 +7,14 @@
       "passwordHash": "0af4ffaf0eb15ff52fc3cf26246e248a47504ba33f905a170272882bd6523a2d0de8bd91c074c90b4b47a7a0fb13656bda0651822500f25eb618e2cfefe832be",
       "salt": "c44839a1e9544fc90678f5ccb8745289",
       "createdAt": "2026-08-09T09:30:04.156Z"
+    },
+    {
+      "id": "google_usr_test_1",
+      "email": "anawozion88@gmail.com",
+      "name": "Ana Wozion",
+      "passwordHash": "",
+      "salt": "",
+      "createdAt": "2026-09-11T07:13:28.812Z"
     }
   ],
   "sessions": [
@@ -15,6 +23,12 @@
       "userId": "user_demo_freelancer_1",
       "createdAt": "2026-09-08T09:33:38.244Z",
       "expiresAt": "2026-09-22T09:33:38.244Z"
+    },
+    {
+      "token": "sess_aa1437914b0d763d1c88ff634e692f68986ed0f73c346680",
+      "userId": "google_usr_test_1",
+      "createdAt": "2026-09-11T07:13:28.812Z",
+      "expiresAt": "2026-09-25T07:13:28.812Z"
     }
   ],
   "files": [

@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { api, authStorage } from './api';
 import { User, FileItem, ClientItem, UserStats } from './types';
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
 import { Sidebar } from './components/Sidebar';
 import { AuthView } from './components/AuthView';
 import { UploadArea } from './components/UploadArea';
@@ -127,6 +129,11 @@ export default function App() {
 
   // Sign out handler
   const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.warn('Firebase signOut error:', e);
+    }
     await api.logout();
     setCurrentUser(null);
     setFiles([]);

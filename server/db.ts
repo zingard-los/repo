@@ -250,6 +250,34 @@ class Database {
     return { user: safeUser };
   }
 
+  public findOrCreateGoogleUser(id: string, email: string, name: string): Omit<User, 'passwordHash' | 'salt'> {
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    let existing = this.data.users.find(u => u.id === id || (normalizedEmail && u.email.toLowerCase() === normalizedEmail));
+    if (existing) {
+      if (name && existing.name !== name) {
+        existing.name = name;
+        this.persist();
+      }
+      const { passwordHash: _, salt: __, ...safeUser } = existing;
+      return safeUser;
+    }
+
+    const newUser: User = {
+      id: id || 'usr_' + crypto.randomBytes(8).toString('hex'),
+      email: normalizedEmail || 'user@gmail.com',
+      name: name.trim() || normalizedEmail.split('@')[0] || 'Freelancer',
+      passwordHash: '',
+      salt: '',
+      createdAt: new Date().toISOString()
+    };
+
+    this.data.users.push(newUser);
+    this.persist();
+
+    const { passwordHash: _, salt: __, ...safeUser } = newUser;
+    return safeUser;
+  }
+
   public getUserById(id: string): Omit<User, 'passwordHash' | 'salt'> | null {
     const user = this.data.users.find(u => u.id === id);
     if (!user) return null;
